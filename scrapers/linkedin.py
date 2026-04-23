@@ -8,7 +8,6 @@ from typing import List
 from datetime import datetime, timezone
 
 from schema import IngestJob
-from config import LINKEDIN_TERMS
 
 logger = logging.getLogger(__name__)
 
@@ -80,28 +79,26 @@ def scrape() -> List[IngestJob]:
     jobs: List[IngestJob] = []
     seen_urls: set = set()
 
-    for term in LINKEDIN_TERMS:
-        try:
-            df = scrape_jobs(
-                site_name=["linkedin"],
-                search_term=term,
-                location=LOCATION,
-                hours_old=2,
-                results_wanted=RESULTS_PER_TERM,
-                linkedin_fetch_description=False,
-                verbose=0,
-            )
-            if df is None or df.empty:
-                continue
-
+    try:
+        # search_term="" retorna todas as vagas do Brasil da última hora,
+        # sem filtro por cargo — o matching acontece no backend ao despachar para usuários
+        df = scrape_jobs(
+            site_name=["linkedin"],
+            search_term="",
+            location=LOCATION,
+            hours_old=1,
+            results_wanted=50,
+            linkedin_fetch_description=False,
+            verbose=0,
+        )
+        if df is not None and not df.empty:
             for _, row in df.iterrows():
                 job = _row_to_job(row)
                 if job and job.url not in seen_urls:
                     seen_urls.add(job.url)
                     jobs.append(job)
-
-        except Exception as e:
-            logger.warning(f"linkedin: erro no termo '{term}': {e}")
+    except Exception as e:
+        logger.warning(f"linkedin: erro no scrape: {e}")
 
     logger.info(f"linkedin: {len(jobs)} vagas coletadas")
     return jobs

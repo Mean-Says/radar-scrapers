@@ -1,0 +1,28 @@
+name: Remote Jobs Scraper
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # a cada 30 minutos (coincide com LinkedIn para um único run)
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Rodar scrapers remotos (Remotive / RemoteOK / Himalayas / Jobicy)
+        env:
+          INGEST_URL: ${{ secrets.INGEST_URL }}
+          INGEST_API_KEY: ${{ secrets.INGEST_API_KEY }}
+        run: python runner.py remote

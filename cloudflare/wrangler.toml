@@ -1,0 +1,17 @@
+name = "radar-scrapers"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cron: roda a cada 15 minutos (Cloudflare suporta */15 * * * *)
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Secrets (não ficam neste arquivo — configure via wrangler secret ou dashboard):
+# wrangler secret put INGEST_URL
+# wrangler secret put INGEST_API_KEY
+#
+# As variáveis abaixo são APENAS para referência local de desenvolvimento.
+# Em produção, use os secrets acima.
+[vars]
+# INGEST_URL = "https://radardeempregos.com/api/jobs/ingest"

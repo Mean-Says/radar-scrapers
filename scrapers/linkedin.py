@@ -87,7 +87,7 @@ def scrape() -> List[IngestJob]:
             search_term="",
             location=LOCATION,
             hours_old=1,
-            results_wanted=50,
+            results_wanted=200,
             linkedin_fetch_description=False,
             verbose=0,
         )

@@ -19,6 +19,7 @@ GROUPS = {
     "remote": "scrapers.remote_apis",
     "indeed": "scrapers.indeed",
     "brazil_boards": "scrapers.brazil_boards",
+    "solides": "scrapers.solides",
 }
 
 

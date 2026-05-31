@@ -1,4 +1,4 @@
-name: Brazil Scrapers (Indeed + Boards)
+name: Brazil Scrapers (Indeed + Boards + Sólides)
 
 on:
   schedule:
@@ -49,3 +49,25 @@ jobs:
           INGEST_URL: ${{ secrets.INGEST_URL }}
           INGEST_API_KEY: ${{ secrets.INGEST_API_KEY }}
         run: python runner.py brazil_boards
+
+  solides:
+    name: Sólides ATS
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Rodar scraper Sólides
+        env:
+          INGEST_URL: ${{ secrets.INGEST_URL }}
+          INGEST_API_KEY: ${{ secrets.INGEST_API_KEY }}
+        run: python runner.py solides

@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 GROUPS = {
     "linkedin": "scrapers.linkedin",
     "remote": "scrapers.remote_apis",
+    "indeed": "scrapers.indeed",
+    "brazil_boards": "scrapers.brazil_boards",
 }
 
 

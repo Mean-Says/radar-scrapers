@@ -7,7 +7,7 @@ from config import INGEST_URL, INGEST_API_KEY
 
 logger = logging.getLogger(__name__)
 
-BATCH_SIZE = 100  # máximo de vagas por request
+BATCH_SIZE = 40  # máximo de vagas por request (menor = ingest mais rápido, menos timeout)
 
 
 async def post_jobs(jobs: List[IngestJob]) -> None:
@@ -25,7 +25,7 @@ async def post_jobs(jobs: List[IngestJob]) -> None:
     total_new = 0
     total_dup = 0
 
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(timeout=120) as client:
         for i in range(0, len(valid), BATCH_SIZE):
             batch = valid[i : i + BATCH_SIZE]
             payload = {"jobs": [j.model_dump(mode="json") for j in batch]}
@@ -42,6 +42,8 @@ async def post_jobs(jobs: List[IngestJob]) -> None:
             except httpx.HTTPStatusError as e:
                 logger.error(f"Ingest HTTP {e.response.status_code}: {e.response.text[:200]}")
             except Exception as e:
-                logger.error(f"Ingest error: {e}")
+                # str(e) costuma vir vazio em timeouts/erros de transporte do httpx —
+                # logar tipo + repr pra não ficar cego (ex.: ReadTimeout, ConnectError).
+                logger.error(f"Ingest error: {type(e).__name__}: {e!r}")
 
     print(f"Enviadas: {len(valid)} | Novas: {total_new} | Duplicadas: {total_dup}")

@@ -31,8 +31,12 @@ async def run(group: str) -> None:
     for name, module_path in targets:
         try:
             mod = __import__(module_path, fromlist=["scrape"])
-            scrape_fn = getattr(mod, "scrape")
-            result = scrape_fn()
+            # Prefer async entry when runner already owns the event loop
+            if hasattr(mod, "scrape_async"):
+                result = await getattr(mod, "scrape_async")()
+            else:
+                scrape_fn = getattr(mod, "scrape")
+                result = scrape_fn()
             logger.info(f"{name}: {len(result)} vagas")
             jobs.extend(result)
         except Exception as e:

@@ -1,9 +1,11 @@
 /**
- * Cloudflare Worker — Remote APIs scraper
+ * Cloudflare Worker — radar-coletor (APIs remotas)
  * Fontes: Remotive, RemoteOK, Himalayas, Jobicy
  * Todas são JSON APIs públicas (sem auth, sem browser)
  * Roda via Cron Trigger a cada 15 minutos
  */
+
+const BOT_UA = "RadarDeEmpregosBot/2.0 (+https://radardeempregos.com/sobre-os-dados)";
 
 export interface Env {
   INGEST_URL: string;
@@ -35,7 +37,7 @@ async function fetchRemotive(): Promise<IngestJob[]> {
     try {
       const resp = await fetch(
         `https://remotive.com/api/remote-jobs?category=${cat}&limit=30`,
-        { cf: { cacheTtl: 0 } }
+        { headers: { "User-Agent": BOT_UA }, cf: { cacheTtl: 0 } }
       );
       if (!resp.ok) continue;
       const data: any = await resp.json();
@@ -66,7 +68,7 @@ async function fetchRemoteOK(): Promise<IngestJob[]> {
   const jobs: IngestJob[] = [];
   try {
     const resp = await fetch("https://remoteok.com/api", {
-      headers: { "User-Agent": "Mozilla/5.0" },
+      headers: { "User-Agent": BOT_UA },
       cf: { cacheTtl: 0 },
     });
     if (!resp.ok) return jobs;
@@ -97,6 +99,7 @@ async function fetchHimalayas(): Promise<IngestJob[]> {
   const jobs: IngestJob[] = [];
   try {
     const resp = await fetch("https://himalayas.app/jobs/api?limit=50", {
+      headers: { "User-Agent": BOT_UA },
       cf: { cacheTtl: 0 },
     });
     if (!resp.ok) return jobs;
@@ -131,6 +134,7 @@ async function fetchJobicy(): Promise<IngestJob[]> {
   const jobs: IngestJob[] = [];
   try {
     const resp = await fetch("https://jobicy.com/api/v2/remote-jobs?count=50", {
+      headers: { "User-Agent": BOT_UA },
       cf: { cacheTtl: 0 },
     });
     if (!resp.ok) return jobs;
@@ -219,6 +223,6 @@ export default {
   // Permite testar via GET /
   async fetch(_req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     ctx.waitUntil(this.scheduled({} as any, env, ctx));
-    return new Response("Scraper iniciado", { status: 202 });
+    return new Response("Coleta iniciada", { status: 202 });
   },
 };
